@@ -1,15 +1,6 @@
 CREATE DATABASE garden;
 USE garden;
 
-CREATE TABLE pago (
-    codigo_cliente INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    forma_pago VARCHAR(40) NOT NULL,
-    id_transaccion VARCHAR(50) NOT NULL,
-    fecha_pago DATE NOT NULL,
-    total DECIMAL(15, 2) NOT NULL,
-    FOREIGN KEY (codigo_cliente) REFERENCES cliente (codigo_cliente)
-);
-
 CREATE TABLE oficina (
     codigo_oficina VARCHAR(10) NOT NULL,
     ciudad VARCHAR(30) NOT NULL,
@@ -22,15 +13,25 @@ CREATE TABLE oficina (
     PRIMARY KEY (codigo_oficina)
 );
 
-CREATE TABLE pedido (
-    codigo_pedido INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fecha_pedido DATE NOT NULL,
-    fecha_espera DATE NOT NULL,
-    fecha_entrega DATE NOT NULL,
-    estado VARCHAR(15) NOT NULL,
-    comentarios TEXT NOT NULL,
-    codigo_cliente INT NOT NULL,
-    FOREIGN KEY (codigo_cliente) REFERENCES cliente (codigo_cliente)
+CREATE TABLE gama_producto (
+    gama VARCHAR(50) NOT NULL,
+    descripcion_texto TEXT NOT NULL,
+    descripcion_html TEXT NOT NULL,
+    imagen VARCHAR(256) NOT NULL,
+    PRIMARY KEY (gama)
+);
+
+CREATE TABLE empleado (
+    codigo_empleado INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido1 VARCHAR(50) NOT NULL,
+    apellido2 VARCHAR(50) NOT NULL,
+    extension VARCHAR(10) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    codigo_oficina VARCHAR(10) NOT NULL,
+    codigo_jefe INT UNSIGNED,
+    puesto VARCHAR(50) NOT NULL,
+    FOREIGN KEY (codigo_oficina) REFERENCES oficina (codigo_oficina)
 );
 
 CREATE TABLE cliente (
@@ -46,41 +47,9 @@ CREATE TABLE cliente (
     region VARCHAR(50) NOT NULL,
     pais VARCHAR(50) NOT NULL,
     codigo_postal VARCHAR(10) NOT NULL,
-    codigo_empleado_rep_ventas INT NOT NULL,
+    codigo_empleado_rep_ventas INT UNSIGNED,
     limite_credito DECIMAL(15, 2) NOT NULL,
     FOREIGN KEY (codigo_empleado_rep_ventas) REFERENCES empleado (codigo_empleado)
-);
-
-CREATE TABLE gama_producto (
-    gama VARCHAR(50) NOT NULL,
-    descripcion_texto TEXT NOT NULL,
-    descripcion_html TEXT NOT NULL,
-    imagen VARCHAR(256) NOT NULL,
-    PRIMARY KEY (gama)
-);
-
-CREATE TABLE detalle_pedido (
-    codigo_pedido INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    codigo_producto VARCHAR(15) NOT NULL,
-    cantidad INT NOT NULL,
-    precio_unidad DECIMAL(15, 2) NOT NULL,
-    numero_linea SMALLINT NOT NULL,
-    FOREIGN KEY (codigo_pedido) REFERENCES pedido (codigo_pedido),
-    FOREIGN KEY (codigo_producto) REFERENCES producto (codigo_producto)
-);
-
-CREATE TABLE empleado (
-    codigo_empleado INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    apellido1 VARCHAR(50) NOT NULL,
-    apellido2 VARCHAR(50) NOT NULL,
-    extension VARCHAR(10) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    codigo_oficina VARCHAR(10) NOT NULL,
-    codigo_jefe INT NOT NULL,
-    puesto VARCHAR(50) NOT NULL,
-    FOREIGN KEY (codigo_oficina) REFERENCES oficina (codigo_oficina),
-    FOREIGN KEY (codigo_jefe) REFERENCES empleado (codigo_empleado)
 );
 
 CREATE TABLE producto (
@@ -95,4 +64,35 @@ CREATE TABLE producto (
     precio_proveedor DECIMAL(15, 2) NOT NULL,
     PRIMARY KEY (codigo_producto),
     FOREIGN KEY (gama) REFERENCES gama_producto (gama)
+);
+
+CREATE TABLE pedido (
+    codigo_pedido INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fecha_pedido DATE NOT NULL,
+    fecha_espera DATE NOT NULL,
+    fecha_entrega DATE NOT NULL,
+    estado VARCHAR(15) NOT NULL,
+    comentarios TEXT NOT NULL,
+    codigo_cliente INT UNSIGNED,
+    FOREIGN KEY (codigo_cliente) REFERENCES cliente (codigo_cliente)
+);
+
+CREATE TABLE detalle_pedido (
+    codigo_pedido INT UNSIGNED NOT NULL,
+    codigo_producto VARCHAR(15) NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unidad DECIMAL(15, 2) NOT NULL,
+    numero_linea SMALLINT NOT NULL,
+    PRIMARY KEY (codigo_pedido, codigo_producto),
+    FOREIGN KEY (codigo_producto) REFERENCES producto (codigo_producto),
+    FOREIGN KEY (codigo_pedido) REFERENCES pedido (codigo_pedido)
+);
+
+CREATE TABLE pago (
+    codigo_cliente INT UNSIGNED NOT NULL,
+    forma_pago VARCHAR(40) NOT NULL,
+    id_transaccion VARCHAR(50) NOT NULL,
+    fecha_pago DATE NOT NULL,
+    total DECIMAL(15, 2) NOT NULL,
+    FOREIGN KEY (codigo_cliente) REFERENCES cliente (codigo_cliente)
 );
